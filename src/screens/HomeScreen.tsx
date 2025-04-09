@@ -1,7 +1,5 @@
 import {
   Image,
-  PermissionsAndroid,
-  Platform,
   StyleSheet,
   Text,
   ToastAndroid,
@@ -16,7 +14,6 @@ import Animated, {
   withRepeat,
   Easing,
 } from 'react-native-reanimated';
-import RNFS from 'react-native-fs';
 import {useTheme} from '../context/ThemeContext';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {RootStackParamList} from '../navigation/RootNavigator';
@@ -26,6 +23,20 @@ const HomeScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const scale = useSharedValue(1);
   const fade = useSharedValue(0);
+
+  const username = 'Lucky';
+  const getGreetingMessage = (name: string) => {
+    const hour = new Date().getHours();
+    let greeting = 'Good Morning';
+    if (hour >= 12 && hour < 18) {
+      greeting = 'Good Afternoon';
+    } else if (hour >= 18) {
+      greeting = 'Good Evening';
+    } else {
+      greeting = 'Good Night';
+    }
+    return `${greeting}, ${name}`;
+  };
 
   useEffect(() => {
     scale.value = withRepeat(
@@ -52,52 +63,15 @@ const HomeScreen: React.FC = () => {
     };
   });
 
-  // const downloadResume = async () => {
-  //   const fileURL =
-  //     'https://drive.google.com/file/d/1HIPUVx7ZhpOu9v9xzcflqB5MJ_pxC0lQ/view?usp=sharing';
-  //   const fileName = 'Lucky Bairwa.pdf';
-  //   const path = `${RNFS.DownloadDirectoryPath}/${fileName}`;
-
-  //   try {
-  //     if (Platform.OS === 'android') {
-  //       const granted = await PermissionsAndroid.request(
-  //         PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-  //       );
-  //       if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-  //         ToastAndroid.show('Storage permission denied', ToastAndroid.SHORT);
-  //         return;
-  //       }
-  //     }
-
-  //     const download = RNFS.downloadFile({
-  //       fromUrl: fileURL,
-  //       toFile: path,
-  //       background: true,
-  //       discretionary: true,
-  //       progress: (res: {bytesWritten: number; contentLength: number}) => {
-  //         console.log(
-  //           `Downloaded: ${(
-  //             (res.bytesWritten / res.contentLength) *
-  //             100
-  //           ).toFixed(2)}%`,
-  //         );
-  //       },
-  //     });
-
-  //     await download.promise;
-  //     ToastAndroid.show('Resume downloaded successfully!', ToastAndroid.SHORT);
-  //     console.log('Download complete:', path);
-  //   } catch (error) {
-  //     console.error('Download failed:', error);
-  //   }
-  // };
-
   const downloadResume = () => {
     ToastAndroid.show('Resume not available!', ToastAndroid.SHORT);
   };
 
   return (
     <View style={[styles.container]}>
+      <View style={[styles.greetingContainer, {borderColor: theme.primary}]}>
+        <Text style={[styles.greetingText, {color: theme.primary}]}>{getGreetingMessage(username)}</Text>
+      </View>
       <Animated.View
         style={[
           styles.imageContainer,
@@ -148,7 +122,7 @@ const HomeScreen: React.FC = () => {
 
         <TouchableOpacity
           style={[styles.btn, {backgroundColor: theme.themeColor}]}
-          onPress={() => navigation.navigate('Themes')}>
+          onPress={() => navigation.navigate('Setting')}>
           <Text style={[styles.btnText]}>Theme</Text>
         </TouchableOpacity>
       </Animated.View>
@@ -162,9 +136,6 @@ const HomeScreen: React.FC = () => {
           </Text>
         </TouchableOpacity>
       </Animated.View>
-
-      {/* add social links from react-native-vector-icons below*/}
-      {/* <Icon name="whatsapp" size={30} color="green" /> */}
     </View>
   );
 };
@@ -176,6 +147,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
+  },
+  greetingContainer: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 10,
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    zIndex: 10,
+  },
+  greetingText: {
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   imageContainer: {
     width: 200,
@@ -221,7 +205,7 @@ const styles = StyleSheet.create({
   },
   btn: {
     paddingVertical: 8,
-      paddingHorizontal: 15,
+    paddingHorizontal: 15,
     borderRadius: 8,
     margin: 5,
     width: 120,

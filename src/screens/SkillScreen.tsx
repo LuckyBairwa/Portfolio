@@ -24,7 +24,7 @@ const {width} = Dimensions.get('window');
 
 const SkillsScreen: React.FC = () => {
   const {theme} = useTheme();
-  const [selectedCategory, setSelectedCategory] = useState<SkillCategory>('Frontend');
+  const [selectedCategory, setSelectedCategory] = useState<SkillCategory>('Programming');
 
   return (
     <View style={[styles.container, {backgroundColor: theme.background}]}>

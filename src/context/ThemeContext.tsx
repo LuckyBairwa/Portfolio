@@ -1,6 +1,7 @@
 import React, {createContext, useContext, useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {themes} from '../styles/theme';
+import { ActivityIndicator } from 'react-native';
 
 const THEME_STORAGE_KEY = 'selectedTheme';
 
@@ -11,6 +12,8 @@ const ThemeContext = createContext({
 
 export const ThemeProvider = ({children}: {children: React.ReactNode}) => {
   const [theme, setTheme] = useState(themes.neonGreen);
+  const [isThemeLoaded, setIsThemeLoaded] = useState(false);
+
 
   useEffect(() => {
     const loadTheme = async () => {
@@ -20,7 +23,10 @@ export const ThemeProvider = ({children}: {children: React.ReactNode}) => {
           setTheme(themes[savedTheme as keyof typeof themes]);
         }
       } catch (error) {
-        console.error('Failed to load theme:', error);
+        console.log('Failed to load theme:', error);
+      }
+      finally {
+        setIsThemeLoaded(true);
       }
     };
     loadTheme();
@@ -32,9 +38,13 @@ export const ThemeProvider = ({children}: {children: React.ReactNode}) => {
     try {
       await AsyncStorage.setItem(THEME_STORAGE_KEY, themeName);
     } catch (error) {
-      console.error('Failed to save theme:', error);
+      console.log('Failed to save theme:', error);
     }
   };
+
+  if (!isThemeLoaded) {
+    return <ActivityIndicator size="large" color={theme.primary} />;
+  }
 
   return (
     <ThemeContext.Provider value={{theme, setTheme: changeTheme}}>

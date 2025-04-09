@@ -29,6 +29,7 @@ const AboutScreen: React.FC = () => {
       style={styles.container}
       contentContainerStyle={{flexGrow: 1}}
       showsVerticalScrollIndicator={false}>
+        
       <Animated.View
         style={[
           styles.aboutContainer,

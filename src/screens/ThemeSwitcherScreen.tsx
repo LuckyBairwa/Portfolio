@@ -1,27 +1,59 @@
-import React, { useEffect } from 'react';
-import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+import React, {useContext, useEffect} from 'react';
+import {Text, TouchableOpacity, StyleSheet, Alert} from 'react-native';
 import {useTheme} from '../context/ThemeContext';
 import {themes} from '../styles/theme';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
+import {AuthContext} from '../context/AuthContext';
+import {RootStackParamList} from '../navigation/RootNavigator';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
 interface Theme {
   name: keyof typeof themes;
   color: string;
 }
 
-const ThemeSwitcher: React.FC = () => {
+type SettingScreenNavigationProps = NativeStackNavigationProp<
+  RootStackParamList,
+  'Setting'
+>;
 
-  const translateY = useSharedValue(1500)
+interface SettingScreenProps {
+  navigation: SettingScreenNavigationProps;
+}
 
-  useEffect(()=>{
-    translateY.value = withSpring(0, {damping: 10, stiffness:80});
-  },[translateY])
+const ThemeSwitcher: React.FC<SettingScreenProps> = ({navigation}) => {
+  const translateY = useSharedValue(1500);
+  const {signOut} = useContext(AuthContext);
 
-  const bottomToTop = useAnimatedStyle(()=>{
-    return{
-      transform :[{translateY: translateY.value}]
-    }
-  })
+  useEffect(() => {
+    translateY.value = withSpring(0, {damping: 10, stiffness: 80});
+  }, [translateY]);
+
+  const bottomToTop = useAnimatedStyle(() => {
+    return {
+      transform: [{translateY: translateY.value}],
+    };
+  });
+
+  const handleLogout = () => {
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      {
+        text: 'No',
+        style: 'cancel',
+      },
+      {
+        text: 'Logout',
+        onPress: async () => {
+          await signOut();
+          navigation.replace('Login');
+        },
+      },
+    ]);
+  };
 
   const {theme, setTheme} = useTheme();
   const themes: Theme[] = [
@@ -38,16 +70,21 @@ const ThemeSwitcher: React.FC = () => {
     {name: 'neonLime', color: '#CCFF00'},
     {name: 'neonYellow', color: '#FFFF00'},
     {name: 'neonCyan', color: '#00FFFF'},
-    // {name: 'neonWhite', color: '#FFFFFF'},
   ];
 
   return (
     <Animated.View style={[styles.container]}>
+      <TouchableOpacity
+        style={[styles.logoutTopRight, {backgroundColor: theme.primary}]}
+        onPress={handleLogout}>
+        <Text style={[styles.logoutText, {color: 'black'}]}>Logout</Text>
+      </TouchableOpacity>
+
       <Animated.Text style={[styles.title, {color: '#ffffff'}, bottomToTop]}>
         Choose Your Theme
       </Animated.Text>
 
-      <Animated.View style={[styles.themeList,bottomToTop]}>
+      <Animated.View style={[styles.themeList, bottomToTop]}>
         {themes.map(({name, color}) => (
           <TouchableOpacity
             key={name}
@@ -76,7 +113,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#121212',
+    backgroundColor: '#0f0f1f',
   },
   title: {
     fontSize: 22,
@@ -108,6 +145,20 @@ const styles = StyleSheet.create({
     shadowColor: '#FFF',
     shadowOpacity: 0.8,
     shadowRadius: 10,
+  },
+  logoutTopRight: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    backgroundColor: '#FF3131',
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    zIndex: 999,
+  },
+  logoutText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
 
